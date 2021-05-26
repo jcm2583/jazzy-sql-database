@@ -66,13 +66,29 @@ app.post('/artist', (req, res) => {
 });
 
 app.get('/song', (req, res) => {
-    console.log(`In /songs GET`);
-    res.send(songList);
+    const querySongs = `SELECT * FROM "song" ORDER BY "title";` 
+
+    pool.query(querySongs)
+    .then( (result) => {
+        console.log(result.rows);
+        res.send(result.rows);
+    })
 });
 
 app.post('/song', (req, res) => {
-    songList.push(req.body);
-    res.sendStatus(201);
+    
+    let querySongs = `INSERT INTO "song" ("title", "length", "released")
+    VALUES ($1, $2, $3);`
+
+    let songValues = [req.body.title, req.body.length, req.body.released];
+
+    pool.query(querySongs, songValues)
+    .then( (result) => {
+        res.sendStatus(201);
+    }).catch ( (err) => {
+        console.log(err);
+        res.sendStatus(500);
+    })
 });
 
 
